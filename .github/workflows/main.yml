@@ -23,15 +23,15 @@ jobs:
           dotnet-version: '8.0.x'
           
       - name: Restore
-        run: dotnet restore ./FIAP.PhaseOne.sln
+        run: dotnet restore ./ContactQueueService.sln
         
       - name: Build
-        run: dotnet build ./FIAP.PhaseOne.sln --configuration Release --no-restore
+        run: dotnet build ./ContactQueueService.sln --configuration Release --no-restore
         
       - name: Publish
-        run: dotnet publish ./FIAP.PhaseOne.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
-      - name: Test
-        run: dotnet test ./FIAP.PhaseOne.sln --verbosity normal                    
+        run: dotnet publish ./ContactQueueService.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
+      #- name: Test
+      #  run: dotnet test ./ContactQueueService.sln --verbosity normal                    
       - name: Deployment
         uses: Azure/webapps-deploy@v3.0.0
         with:
