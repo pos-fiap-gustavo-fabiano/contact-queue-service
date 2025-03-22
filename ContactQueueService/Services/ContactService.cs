@@ -26,7 +26,7 @@ namespace ContactQueueService.Services
 
         public async Task<ContactDto> UpdateContactAsync(Guid id, ContactDto contactDto)
         {
-            await _contactBus.PublishContactUpdated(contactDto);
+            await _contactBus.PublishContactUpdated(new UpdateContactDto(id, contactDto));
             return contactDto;
         }
 

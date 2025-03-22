@@ -58,7 +58,7 @@ namespace ContactQueueService.MessageBroker
             }
         }
 
-        public async Task PublishContactUpdated(ContactDto contact)
+        public async Task PublishContactUpdated(UpdateContactDto contact)
         {
             try
             {
