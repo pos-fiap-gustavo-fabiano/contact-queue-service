@@ -20,6 +20,7 @@ namespace ContactQueueService.MessageBroker
 
             services.AddMassTransit(x =>
             {
+                x.SetKebabCaseEndpointNameFormatter();
                 
                 x.UsingRabbitMq((context, cfg) =>
                 {

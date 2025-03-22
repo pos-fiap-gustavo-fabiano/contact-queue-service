@@ -1,9 +1,13 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using ContactQueueService.Configuration;
 using ContactQueueService.Dto;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
+using RabbitMQ.Client;
 
 namespace ContactQueueService.MessageBroker
 {
@@ -12,12 +16,16 @@ namespace ContactQueueService.MessageBroker
         private readonly IBus _bus;
         private readonly ILogger<ContactBus> _logger;
         private readonly RabbitMQSettings _rabbitMQSettings;
+        private readonly System.Diagnostics.ActivitySource _activitySource;
+        private static readonly TextMapPropagator _propagator = Propagators.DefaultTextMapPropagator;
 
-        public ContactBus(IBus bus, ILogger<ContactBus> logger, RabbitMQSettings rabbitMQSettings)
+
+        public ContactBus(IBus bus, ILogger<ContactBus> logger, RabbitMQSettings rabbitMQSettings, ActivitySource activitySource)
         {
             _bus = bus ?? throw new ArgumentNullException(nameof(bus));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _rabbitMQSettings = rabbitMQSettings ?? throw new ArgumentNullException(nameof(rabbitMQSettings));
+            _activitySource = activitySource;
         }
 
         public async Task PublishContactCreated(ContactDto contact)
@@ -25,10 +33,20 @@ namespace ContactQueueService.MessageBroker
             try
             {
                 _logger.LogInformation("Publishing contact created");
-                
+                // Criar uma nova Activity para rastrear a operação de publicação
+                using var activity = _activitySource.StartActivity(
+                    $"PublishContactCreated",
+                    ActivityKind.Producer);
+                // Adicionar atributos importantes à activity atual
+                activity?.SetTag("messaging.system", "rabbitmq");
+                activity?.SetTag("messaging.destination_kind", "queue");
+                activity?.SetTag("messaging.destination", _rabbitMQSettings.Queues.ContactCreate);
+                activity?.SetTag("messaging.rabbitmq.routing_key", _rabbitMQSettings.Queues.ContactCreate);
+
                 var queueUri = new Uri($"{_rabbitMQSettings.ConnectionString}/{_rabbitMQSettings.Queues.ContactCreate}");
                 var endpoint = await _bus.GetSendEndpoint(queueUri);
                 
+                activity?.SetStatus(ActivityStatusCode.Ok);
                 await endpoint.Send(contact);
                 
                 _logger.LogInformation("Contact published to create queue");
