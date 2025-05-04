@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contacts-queue-config
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  RABBITMQ_CONNECTION_STRING: "amqps://swugykvo:S_0eJdIk7OrFeqpMqgTRd9RhY54do89M@fly.rmq.cloudamqp.com/swugykvo"
