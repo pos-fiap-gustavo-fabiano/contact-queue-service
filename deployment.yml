@@ -1,3 +1,15 @@
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contacts-queue-config
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  RABBITMQ_CONNECTION_STRING: "amqps://admin:admin@rabbitmq:5672/"
+
+---
+
+# Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,3 +42,21 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "150m"
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: contacts-queue-service
+  labels:
+    app: contacts-queue
+spec:
+  type: NodePort
+  selector:
+    app: contacts-queue
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30081
