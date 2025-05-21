@@ -18,6 +18,7 @@ spec:
           ports:
             - containerPort: 5672
             - containerPort: 15672
+            - containerPort: 15692
           env:
             - name: RABBITMQ_DEFAULT_USER
               value: "admin"
@@ -33,6 +34,7 @@ spec:
           volumeMounts:
             - name: rabbitmq-data
               mountPath: /var/lib/rabbitmq
+
       volumes:
         - name: rabbitmq-data
           persistentVolumeClaim:
@@ -54,5 +56,9 @@ spec:
       port: 15672
       targetPort: 15672
       nodePort: 30008
+    - name: metrics
+      port: 15692
+      targetPort: 15692
+      nodePort: 30919
   selector:
     app: rabbitmq
